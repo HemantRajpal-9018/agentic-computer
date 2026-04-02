@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  agent-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentic-server
+    ports:
+      - "${SERVER_PORT:-8000}:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./skills:/app/skills
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - agentic-net
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: agentic-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://agent-server:8000
+      - NEXT_PUBLIC_WS_URL=ws://agent-server:8000/ws
+    depends_on:
+      agent-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - agentic-net
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: agentic-chromadb
+    ports:
+      - "8100:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    restart: unless-stopped
+    networks:
+      - agentic-net
+
+volumes:
+  chroma-data:
+
+networks:
+  agentic-net:
+    driver: bridge

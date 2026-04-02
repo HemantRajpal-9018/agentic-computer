@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-computer"
+version = "0.1.0"
+description = "Open-source autonomous computer agent with multi-agent orchestration, browser automation, code execution, and persistent memory."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "HemantRajpal-9018"},
+]
+keywords = ["ai", "agent", "automation", "browser", "orchestration", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "websockets>=12.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "httpx>=0.25.0",
+    "openai>=1.6.0",
+    "anthropic>=0.39.0",
+    "playwright>=1.40.0",
+    "chromadb>=0.4.18",
+    "tiktoken>=0.5.2",
+    "pyyaml>=6.0.1",
+    "rich>=13.7.0",
+    "click>=8.1.7",
+    "networkx>=3.2.1",
+    "jinja2>=3.1.2",
+    "aiosqlite>=0.19.0",
+    "numpy>=1.26.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.8",
+    "mypy>=1.7.0",
+    "pre-commit>=3.6.0",
+]
+
+[project.scripts]
+agentic-computer = "agentic_computer.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/HemantRajpal-9018/agentic-computer"
+Repository = "https://github.com/HemantRajpal-9018/agentic-computer"
+Issues = "https://github.com/HemantRajpal-9018/agentic-computer/issues"
+
+[tool.setuptools.packages.find]
+include = ["agentic_computer*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

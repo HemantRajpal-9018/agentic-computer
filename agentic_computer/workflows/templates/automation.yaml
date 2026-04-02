@@ -1,0 +1,57 @@
+name: automation
+description: >
+  Generic automation workflow pattern.  Sets up the required environment,
+  executes a configurable list of tasks, verifies the results meet
+  acceptance criteria, and performs cleanup regardless of outcome.
+
+variables:
+  environment: "default"
+  tasks: []
+  timeout_seconds: 300
+  cleanup_on_failure: true
+  acceptance_criteria: "all_passed"
+
+steps:
+  - id: setup_environment
+    name: Set Up Environment
+    tool: environment_manager
+    params:
+      environment: "{{environment}}"
+      action: "setup"
+      timeout_seconds: "{{timeout_seconds}}"
+    depends_on: []
+    retries: 2
+
+  - id: execute_tasks
+    name: Execute Tasks
+    tool: task_executor
+    params:
+      tasks: "{{tasks}}"
+      environment: "{{setup_environment.environment_id}}"
+      timeout_seconds: "{{timeout_seconds}}"
+    depends_on:
+      - setup_environment
+    retries: 1
+
+  - id: verify_results
+    name: Verify Results
+    tool: result_verifier
+    params:
+      task_results: "{{execute_tasks.results}}"
+      acceptance_criteria: "{{acceptance_criteria}}"
+      environment: "{{setup_environment.environment_id}}"
+    depends_on:
+      - execute_tasks
+    retries: 1
+
+  - id: cleanup
+    name: Clean Up Environment
+    tool: environment_manager
+    params:
+      environment: "{{setup_environment.environment_id}}"
+      action: "teardown"
+      cleanup_on_failure: "{{cleanup_on_failure}}"
+      task_status: "{{verify_results.status}}"
+    depends_on:
+      - verify_results
+    retries: 2

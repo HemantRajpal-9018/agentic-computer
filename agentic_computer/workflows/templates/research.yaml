@@ -1,0 +1,65 @@
+name: research
+description: >
+  Perform structured web research on a topic, extract key content from
+  discovered sources, analyse the findings, and synthesise a final report.
+
+variables:
+  topic: "artificial intelligence"
+  max_sources: 5
+  output_format: "markdown"
+  search_depth: "comprehensive"
+
+steps:
+  - id: define_query
+    name: Define Research Query
+    tool: query_planner
+    params:
+      topic: "{{topic}}"
+      search_depth: "{{search_depth}}"
+      max_sources: "{{max_sources}}"
+    depends_on: []
+    retries: 1
+
+  - id: search_web
+    name: Search the Web
+    tool: web_search
+    params:
+      query: "{{define_query.refined_query}}"
+      num_results: "{{max_sources}}"
+    depends_on:
+      - define_query
+    retries: 2
+
+  - id: extract_content
+    name: Extract Content from Sources
+    tool: content_extractor
+    params:
+      urls: "{{search_web.urls}}"
+      extract_mode: "relevant_text"
+      topic: "{{topic}}"
+    depends_on:
+      - search_web
+    retries: 2
+
+  - id: analyze
+    name: Analyse Extracted Content
+    tool: text_analyzer
+    params:
+      content: "{{extract_content.documents}}"
+      analysis_type: "key_findings"
+      topic: "{{topic}}"
+    depends_on:
+      - extract_content
+    retries: 1
+
+  - id: synthesize_report
+    name: Synthesise Final Report
+    tool: report_generator
+    params:
+      findings: "{{analyze.findings}}"
+      sources: "{{search_web.urls}}"
+      topic: "{{topic}}"
+      format: "{{output_format}}"
+    depends_on:
+      - analyze
+    retries: 1

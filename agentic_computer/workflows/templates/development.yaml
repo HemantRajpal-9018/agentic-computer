@@ -1,0 +1,84 @@
+name: development
+description: >
+  Spec-driven software development workflow.  Starts with requirements
+  analysis, progresses through architecture planning and implementation,
+  then validates with tests, code review, and documentation.
+
+variables:
+  specification: ""
+  language: "python"
+  test_framework: "pytest"
+  output_dir: "./output"
+  coding_style: "pep8"
+
+steps:
+  - id: analyze_requirements
+    name: Analyse Requirements
+    tool: requirements_analyzer
+    params:
+      specification: "{{specification}}"
+      language: "{{language}}"
+      output_dir: "{{output_dir}}"
+    depends_on: []
+    retries: 1
+
+  - id: plan_architecture
+    name: Plan Architecture
+    tool: architecture_planner
+    params:
+      requirements: "{{analyze_requirements.requirements}}"
+      language: "{{language}}"
+      coding_style: "{{coding_style}}"
+    depends_on:
+      - analyze_requirements
+    retries: 1
+
+  - id: implement_code
+    name: Implement Code
+    tool: code_generator
+    params:
+      architecture: "{{plan_architecture.architecture}}"
+      requirements: "{{analyze_requirements.requirements}}"
+      language: "{{language}}"
+      output_dir: "{{output_dir}}"
+      coding_style: "{{coding_style}}"
+    depends_on:
+      - plan_architecture
+    retries: 2
+
+  - id: write_tests
+    name: Write Tests
+    tool: test_generator
+    params:
+      source_files: "{{implement_code.files}}"
+      requirements: "{{analyze_requirements.requirements}}"
+      test_framework: "{{test_framework}}"
+      output_dir: "{{output_dir}}"
+    depends_on:
+      - implement_code
+    retries: 2
+
+  - id: review_code
+    name: Review Code
+    tool: code_reviewer
+    params:
+      source_files: "{{implement_code.files}}"
+      test_files: "{{write_tests.files}}"
+      coding_style: "{{coding_style}}"
+      language: "{{language}}"
+    depends_on:
+      - write_tests
+    retries: 1
+
+  - id: document
+    name: Generate Documentation
+    tool: documentation_generator
+    params:
+      source_files: "{{implement_code.files}}"
+      architecture: "{{plan_architecture.architecture}}"
+      requirements: "{{analyze_requirements.requirements}}"
+      review_notes: "{{review_code.feedback}}"
+      output_dir: "{{output_dir}}"
+    depends_on:
+      - review_code
+    retries: 1
